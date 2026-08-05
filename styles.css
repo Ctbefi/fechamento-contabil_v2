@@ -46,7 +46,11 @@ body{font-family:Calibri,Arial,sans-serif;background:var(--bg);color:var(--text)
 .kpi-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
 .kpi-val{font-size:26px;font-weight:700;line-height:1}
 .kpi-sub{font-size:9px;color:var(--muted);margin-top:4px}
-.section-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.section-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+.perf-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:11px;border-bottom:1px solid var(--border)}
+.perf-row:last-child{border-bottom:none}
+.perf-label{color:var(--muted)}
+.perf-val{font-weight:700}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:13px}
 .card-title{font-size:12px;font-weight:500;color:#fff;margin-bottom:11px;display:flex;align-items:center;gap:5px}
 .empresa-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}

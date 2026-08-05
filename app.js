@@ -190,14 +190,14 @@ function badge(s){
 
 function dashData(){return dashEmp==='Todas'?data:data.filter(function(d){return d.empresa===dashEmp;});}
 
-function renderAll(){renderDashEmpFilter();kpis();empresaBars();critTable();renderEmpresaFilter();renderStatusFilter();renderOp();renderAlertas();setTimeout(statusChart,80);}
+function renderAll(){renderDashEmpFilter();kpis();empresaBars();critTable();renderEmpresaFilter();renderStatusFilter();renderOp();renderAlertas();setTimeout(function(){statusChart();perfCard();},80);}
 
 function renderDashEmpFilter(){
   document.getElementById('dashEmpFilter').innerHTML=['Todas'].concat(EMPRESAS).map(function(e){
     return '<button class="ef-btn'+(dashEmp===e?' active':'')+'" onclick="setDE(\''+e+'\')">'+e+'</button>';
   }).join('');
 }
-function setDE(e){dashEmp=e;renderDashEmpFilter();kpis();empresaBars();critTable();setTimeout(statusChart,80);}
+function setDE(e){dashEmp=e;renderDashEmpFilter();kpis();empresaBars();critTable();setTimeout(function(){statusChart();perfCard();},80);}
 
 function kpis(){
   var dd=dashData();
@@ -252,6 +252,44 @@ function statusChart(){
       scales:{
         x:{ticks:{color:'#8b92b8',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
         y:{ticks:{color:'#8b92b8',font:{size:10}},grid:{color:'rgba(255,255,255,.06)'},beginAtZero:true}
+      }}
+  });
+}
+
+var perfChartInst=null;
+function perfCard(){
+  var dd=dashData();
+  var tot=dd.length;
+  var noPrazo=dd.filter(function(d){return d.situacaoFch==='No Prazo';}).length;
+  var atrasado=dd.filter(function(d){return d.situacaoFch==='Atrasado';}).length;
+  var andamento=tot-noPrazo-atrasado; // A iniciar + Em atraso + Fechamento previo + N/A
+  var pPrazo=tot?Math.round(noPrazo/tot*100):0;
+  var pAtraso=tot?Math.round(atrasado/tot*100):0;
+
+  document.getElementById('perfStats').innerHTML=
+    '<div class="perf-row"><span class="perf-label">Total de demandas</span><span class="perf-val">'+tot+'</span></div>'+
+    '<div class="perf-row"><span class="perf-label" style="color:#4ade80">Concluidas no prazo</span><span class="perf-val" style="color:#4ade80">'+noPrazo+' ('+pPrazo+'%)</span></div>'+
+    '<div class="perf-row"><span class="perf-label" style="color:#f87171">Entregues fora do prazo</span><span class="perf-val" style="color:#f87171">'+atrasado+' ('+pAtraso+'%)</span></div>';
+
+  var canvas=document.getElementById('perfChart');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  if(perfChartInst)perfChartInst.destroy();
+  if(!tot){
+    canvas.style.display='none';
+    return;
+  }
+  canvas.style.display='block';
+  perfChartInst=new Chart(ctx,{type:'pie',
+    data:{labels:['No Prazo','Atrasado','Em andamento'],
+      datasets:[{data:[noPrazo,atrasado,andamento],backgroundColor:['#276221','#9C0006','#3d7dd4'],borderColor:'#1a1d2e',borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#8b92b8',font:{size:9},boxWidth:8,padding:8}},
+        tooltip:{callbacks:{label:function(c){
+          var v=c.parsed,pc=tot?Math.round(v/tot*100):0;
+          return c.label+': '+v+' ('+pc+'%)';
+        }}}
       }}
   });
 }
