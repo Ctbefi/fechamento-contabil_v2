@@ -138,14 +138,25 @@ function normalizeHeader(s){
   return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLowerCase();
 }
 
-function acharColObservacoes(rows){
+function acharColunas(rows){
+  var cols={obs:19,resp:5,impacta:2,prazoFch:17,entregaFch:18,situacaoFch:19};
   for(var hi=0;hi<3&&hi<rows.length;hi++){
     var header=rows[hi]||[];
+    var prazoM=[],entregaM=[],situM=[];
     for(var c=0;c<header.length;c++){
-      if(normalizeHeader(header[c])==='observacoes')return c;
+      var h=normalizeHeader(header[c]);
+      if(h==='observacoes')cols.obs=c;
+      if(h==='responsavel')cols.resp=c;
+      if(h.indexOf('impacta resultado')===0)cols.impacta=c;
+      if(h==='data do prazo')prazoM.push(c);
+      if(h==='data da entrega')entregaM.push(c);
+      if(h==='situacao da entrega')situM.push(c);
     }
+    if(prazoM.length)cols.prazoFch=prazoM[prazoM.length-1];
+    if(entregaM.length)cols.entregaFch=entregaM[entregaM.length-1];
+    if(situM.length)cols.situacaoFch=situM[situM.length-1];
   }
-  return 19;
+  return cols;
 }
 
 function escHtml(s){
@@ -166,19 +177,23 @@ function processWorkbook(wb,fileName){
     var ws=wb.Sheets[emp];
     var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
     if(!mesRef&&rows[0]&&rows[0][3])mesRef=xlDate(rows[0][3]);
-    var obsCol=acharColObservacoes(rows);
+    var cols=acharColunas(rows);
     for(var i=2;i<rows.length;i++){
       var r=rows[i];
       var dem=r[0];
       if(!dem||String(dem).trim()===''||String(dem).trim()==='Demandas')continue;
-      var dpf=xlDate(r[16]);
-      var def=r[17]?xlDate(r[17]):'';
-      var sf=r[18]?getSit(r[18]):calcStatus(def,dpf);
-      var obsRaw=r[obsCol];
+      var dpf=xlDate(r[cols.prazoFch]);
+      var def=r[cols.entregaFch]?xlDate(r[cols.entregaFch]):'';
+      var sf=r[cols.situacaoFch]?getSit(r[cols.situacaoFch]):calcStatus(def,dpf);
+      var obsRaw=r[cols.obs];
       var obs=(obsRaw===undefined||obsRaw===null)?'':String(obsRaw).trim();
+      var impactaRaw=r[cols.impacta];
+      var impacta=String(impactaRaw||'').trim();
+      if(impacta!=='Sim'&&impacta!=='Não')impacta='Não informado';
       data.push({id:emp+'-'+id++,empresa:emp,
         demanda:String(dem).trim(),descricao:String(r[1]||'').trim(),
-        responsavel:String(r[4]||'').trim(),
+        responsavel:String(r[cols.resp]||'').trim(),
+        impacta:impacta,
         dataPrazoFch:dpf,dataEntregaFch:def,situacaoFch:sf,
         observacoes:obs});
     }
@@ -198,7 +213,7 @@ function badge(s){
 
 function dashData(){return data.filter(function(d){return dashEmp.indexOf(d.empresa)>=0;});}
 
-function renderAll(){renderDashEmpFilter();kpis();empresaBars();critTable();renderEmpresaFilter();renderStatusFilter();renderOp();setTimeout(function(){statusChart();perfCard();},80);}
+function renderAll(){renderDashEmpFilter();kpis();empresaBars();collabTable();renderEmpresaFilter();renderStatusFilter();renderOp();setTimeout(function(){statusChart();perfCard();impactoCard();},80);}
 
 function renderDashEmpFilter(){
   var todasBtn='<button class="ef-btn'+(dashEmp.length===EMPRESAS.length?' active':'')+'" onclick="setDE(\'Todas\')">Todas</button>';
@@ -209,7 +224,7 @@ function renderDashEmpFilter(){
 }
 function setDE(e){
   if(e==='Todas'){dashEmp=EMPRESAS.slice();}else{toggleInArray(dashEmp,e);}
-  renderDashEmpFilter();kpis();empresaBars();critTable();setTimeout(function(){statusChart();perfCard();},80);
+  renderDashEmpFilter();kpis();empresaBars();collabTable();setTimeout(function(){statusChart();perfCard();impactoCard();},80);
 }
 
 function kpis(){
@@ -307,23 +322,79 @@ function perfCard(){
   });
 }
 
-function critTable(){
-  var crit=dashData().filter(function(d){return d.situacaoFch==='Em atraso';});
-  crit=crit.slice().sort(function(a,b){
-    var da=parseBR(a.dataPrazoFch),db=parseBR(b.dataPrazoFch);
-    if(!da&&!db)return 0;
-    if(!da)return 1;
-    if(!db)return -1;
-    return da-db;
+function collabTable(){
+  var counts={};
+  dashData().forEach(function(d){
+    var names=d.responsavel.split(/\s+e\s+/i).map(function(n){return n.trim();}).filter(Boolean);
+    if(!names.length)names=['(Sem responsavel)'];
+    names.forEach(function(n){
+      if(!counts[n])counts[n]={noPrazo:0,atrasado:0,emAtraso:0,total:0};
+      counts[n].total++;
+      if(d.situacaoFch==='No Prazo')counts[n].noPrazo++;
+      else if(d.situacaoFch==='Atrasado')counts[n].atrasado++;
+      else if(d.situacaoFch==='Em atraso')counts[n].emAtraso++;
+    });
   });
-  if(!crit.length){
-    document.getElementById('critTable').innerHTML='<tbody><tr><td colspan="8" style="text-align:center;padding:20px;color:#8b92b8">Nenhuma demanda pendente com prazo vencido</td></tr></tbody>';
+  var names=Object.keys(counts).sort(function(a,b){
+    var pa=counts[a].emAtraso+counts[a].atrasado, pb=counts[b].emAtraso+counts[b].atrasado;
+    if(pb!==pa)return pb-pa;
+    return counts[b].total-counts[a].total;
+  });
+  if(!names.length){
+    document.getElementById('collabTable').innerHTML='<tbody><tr><td colspan="4" style="text-align:center;padding:20px;color:#8b92b8">Sem dados</td></tr></tbody>';
     return;
   }
-  var rows=crit.map(function(r){
-    return '<tr><td><span class="emp-tag">'+r.empresa+'</span></td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.demanda+'</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8b92b8">'+r.descricao+'</td><td>'+r.responsavel+'</td><td>'+r.dataPrazoFch+'</td><td>'+(r.dataEntregaFch||'-')+'</td><td>'+badge(r.situacaoFch)+'</td><td><span class="obs-cell">'+(r.observacoes?escHtml(r.observacoes):'')+'</span></td></tr>';
+  var rows=names.map(function(n){
+    var c=counts[n];
+    return '<tr><td>'+escHtml(n)+'</td>'+
+      '<td style="color:#4ade80;font-weight:600">'+c.noPrazo+'</td>'+
+      '<td style="color:#f87171;font-weight:600">'+c.atrasado+'</td>'+
+      '<td style="color:#fbbf24;font-weight:600">'+c.emAtraso+'</td></tr>';
   }).join('');
-  document.getElementById('critTable').innerHTML='<thead><tr><th>Empresa</th><th>Demanda</th><th>Descricao</th><th>Responsavel</th><th>Prazo FCH</th><th>Entrega</th><th>Status</th><th>Observações</th></tr></thead><tbody>'+rows+'</tbody>';
+  document.getElementById('collabTable').innerHTML='<thead><tr><th>Colaborador</th><th>No Prazo</th><th>Atrasado</th><th>Em atraso</th></tr></thead><tbody>'+rows+'</tbody>';
+}
+
+var impactoChartInst=null;
+function impactoCard(){
+  var dd=dashData();
+  var sim=dd.filter(function(d){return d.impacta==='Sim';});
+  var nao=dd.filter(function(d){return d.impacta==='Não';});
+  var naoInf=dd.filter(function(d){return d.impacta==='Não informado';});
+  var simTot=sim.length;
+  var byStatus={};
+  ALL_STATUSES.forEach(function(s){byStatus[s]=sim.filter(function(d){return d.situacaoFch===s;}).length;});
+  var pNoPrazo=simTot?Math.round(byStatus['No Prazo']/simTot*100):0;
+  var pendentes=byStatus['Em atraso']+byStatus['A iniciar']+byStatus['Fechamento previo']+byStatus['N/A'];
+
+  document.getElementById('impactoStats').innerHTML=
+    '<div class="perf-row"><span class="perf-label">Impactam resultado (Sim)</span><span class="perf-val">'+simTot+'</span></div>'+
+    '<div class="perf-row"><span class="perf-label" style="color:#4ade80">Concluidas no prazo</span><span class="perf-val" style="color:#4ade80">'+byStatus['No Prazo']+' ('+pNoPrazo+'%)</span></div>'+
+    '<div class="perf-row"><span class="perf-label" style="color:#f87171">Entregues com atraso</span><span class="perf-val" style="color:#f87171">'+byStatus['Atrasado']+'</span></div>'+
+    '<div class="perf-row"><span class="perf-label" style="color:#fbbf24">Pendentes</span><span class="perf-val" style="color:#fbbf24">'+pendentes+'</span></div>'+
+    '<div class="perf-row"><span class="perf-label">Nao impactam (Nao)</span><span class="perf-val">'+nao.length+'</span></div>'+
+    '<div class="perf-row"><span class="perf-label">Nao informado</span><span class="perf-val">'+naoInf.length+'</span></div>';
+
+  var canvas=document.getElementById('impactoChart');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  if(impactoChartInst)impactoChartInst.destroy();
+  if(!simTot){
+    canvas.style.display='none';
+    return;
+  }
+  canvas.style.display='block';
+  var labels=ALL_STATUSES;
+  var vals=labels.map(function(s){return byStatus[s];});
+  var bgs=labels.map(function(s){return (SC[s]&&SC[s].fg)||'#8b92b8';});
+  impactoChartInst=new Chart(ctx,{type:'bar',
+    data:{labels:labels,datasets:[{data:vals,backgroundColor:bgs,borderRadius:4,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#8b92b8',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'}},
+        y:{ticks:{color:'#8b92b8',font:{size:9}},grid:{color:'rgba(255,255,255,.06)'},beginAtZero:true}
+      }}
+  });
 }
 
 function renderEmpresaFilter(){

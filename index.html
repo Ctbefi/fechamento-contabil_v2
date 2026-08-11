@@ -64,7 +64,6 @@
   <div class="tabs">
     <div class="tab active" onclick="switchTab('dash',this)">Dashboard</div>
     <div class="tab" onclick="switchTab('op',this)">Operacional</div>
-    <div class="tab" onclick="switchTab('alertas',this)">Alertas <span class="alert-count" id="alertBadge">0</span></div>
   </div>
   <div class="content" id="dashView">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
@@ -83,13 +82,24 @@
       </div>
       <div class="card">
         <div class="card-title">Indicadores de performance</div>
-        <div id="perfStats"></div>
-        <div style="height:100px;position:relative;margin-top:8px"><canvas id="perfChart"></canvas></div>
+        <div class="perf-flex">
+          <div id="perfStats" style="flex:1"></div>
+          <div style="height:140px;width:140px;flex-shrink:0;position:relative"><canvas id="perfChart"></canvas></div>
+        </div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Demandas pendentes com prazo vencido</div>
-      <table class="tbl" id="critTable"></table>
+    <div class="section-row-2">
+      <div class="card">
+        <div class="card-title">Entrega por colaborador</div>
+        <table class="tbl" id="collabTable"></table>
+      </div>
+      <div class="card">
+        <div class="card-title">Impacto no resultado</div>
+        <div class="perf-flex">
+          <div id="impactoStats" style="flex:1"></div>
+          <div style="height:140px;width:180px;flex-shrink:0;position:relative"><canvas id="impactoChart"></canvas></div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="content" id="opView" style="display:none">
@@ -103,12 +113,6 @@
     </div>
     <table class="tbl" id="opTable"></table>
     <div id="opCount" style="margin-top:8px;font-size:11px;color:#8b92b8"></div>
-  </div>
-  <div class="content" id="alertasView" style="display:none">
-    <div class="card">
-      <div class="card-title">Demandas pendentes com prazo vencido</div>
-      <div id="alertasList"></div>
-    </div>
   </div>
 </div>
 
