@@ -42,26 +42,26 @@ body{font-family:Calibri,Arial,sans-serif;background:var(--bg);color:var(--text)
 .content{padding:14px 20px}
 .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px}
 .kpi{background:var(--bg2);border:1px solid var(--border);border-left:3px solid;border-radius:8px;padding:11px 13px}
-.kpi-label{font-size:13.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
-.kpi-val{font-size:39px;font-weight:700;line-height:1}
-.kpi-sub{font-size:13.5px;color:var(--muted);margin-top:4px}
+.kpi-label{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.kpi-val{font-size:27.3px;font-weight:700;line-height:1}
+.kpi-sub{font-size:9.5px;color:var(--muted);margin-top:4px}
 .section-row{display:grid;grid-template-columns:1fr .62fr 1.38fr;gap:12px;margin-bottom:12px}
 .section-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .perf-flex{display:flex;align-items:center;gap:14px}
 .perf-stack{flex-direction:column;align-items:center}
-.perf-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:22px;border-bottom:1px solid var(--border)}
+.perf-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:15.4px;border-bottom:1px solid var(--border)}
 .perf-row:last-child{border-bottom:none}
 .perf-label{color:var(--muted)}
 .perf-val{font-weight:700}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:13px}
-.card-title{font-size:24px;font-weight:500;color:#fff;margin-bottom:11px;display:flex;align-items:center;gap:5px}
+.card-title{font-size:16.8px;font-weight:500;color:#fff;margin-bottom:11px;display:flex;align-items:center;gap:5px}
 .empresa-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
 .empresa-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.empresa-name{font-size:22px;color:var(--muted);width:100px}
+.empresa-name{font-size:15.4px;color:var(--muted);width:100px}
 .bar-bg{flex:1;background:var(--bg3);border-radius:3px;height:6px;overflow:hidden}
 .bar-fill{height:100%;border-radius:3px}
-.empresa-pct{font-size:22px;font-weight:600;width:55px;text-align:right}
-.empresa-cnt{font-size:20px;color:var(--muted);min-width:130px;text-align:right}
+.empresa-pct{font-size:15.4px;font-weight:600;width:55px;text-align:right}
+.empresa-cnt{font-size:14px;color:var(--muted);min-width:130px;text-align:right}
 .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
 .tbl{width:100%;border-collapse:collapse;font-size:11px}
 .tbl th{text-align:left;padding:6px 8px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);text-transform:uppercase;font-size:10px;letter-spacing:.4px}
@@ -73,7 +73,7 @@ body{font-family:Calibri,Arial,sans-serif;background:var(--bg);color:var(--text)
 .op-bar input::placeholder{color:var(--muted)}
 .ef-btn{padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--muted)}
 .ef-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-#dashEmpFilter .ef-btn{font-size:16.5px;padding:6px 14px}
+#dashEmpFilter .ef-btn{font-size:11.55px;padding:6px 14px}
 .sf-btn{padding:3px 8px;border-radius:4px;font-size:10px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--muted)}
 .sf-btn.active{font-weight:600}
 .edit-btn{padding:3px 7px;font-size:11px;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--muted)}
@@ -81,6 +81,6 @@ body{font-family:Calibri,Arial,sans-serif;background:var(--bg);color:var(--text)
 .obs-cell{display:block;max-width:220px;white-space:normal;word-break:break-word;overflow-wrap:break-word;color:var(--muted);font-size:11px;line-height:1.4}
 .inp-obs{font-size:11px;padding:3px 6px;border-radius:4px;border:1px solid var(--border);background:var(--bg3);color:#fff;width:160px}
 .emp-tag{background:var(--bg3);border:1px solid var(--border);padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;color:var(--muted)}
-#collabTable{font-size:22px}
-#collabTable th{font-size:20px;padding:8px 10px}
+#collabTable{font-size:15.4px}
+#collabTable th{font-size:14px;padding:8px 10px}
 #collabTable td{padding:10px 10px}
