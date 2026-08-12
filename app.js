@@ -13,6 +13,23 @@ var SC = {
 };
 var ALL_STATUSES=['No Prazo','Em atraso','Atrasado','A iniciar','Fechamento previo','N/A'];
 var data=[], mesRef='', dashEmp=EMPRESAS.slice(), fEmp=EMPRESAS.slice(), fSt=ALL_STATUSES.slice();
+var COLDEFS=[
+  {key:'empresa',label:'Emp.'},
+  {key:'demanda',label:'Demanda'},
+  {key:'descricao',label:'Descricao'},
+  {key:'responsavel',label:'Responsavel'},
+  {key:'dataPrazoFch',label:'Prazo FCH'},
+  {key:'dataEntregaFch',label:'Data entrega'},
+  {key:'situacaoFch',label:'Status'},
+  {key:'observacoes',label:'Observações'}
+];
+var colFilters={};
+COLDEFS.forEach(function(c){colFilters[c.key]=[];});
+function colValue(r,key){
+  if(key==='dataEntregaFch')return r.dataEntregaFch||'-';
+  if(key==='observacoes')return r.observacoes||'(vazio)';
+  return r[key];
+}
 
 function toggleInArray(arr,val){
   var idx=arr.indexOf(val);
@@ -202,6 +219,7 @@ function processWorkbook(wb,fileName){
   document.getElementById('loadScreen').style.display='none';
   document.getElementById('app').style.display='block';
   dashEmp=EMPRESAS.slice();fEmp=EMPRESAS.slice();fSt=ALL_STATUSES.slice();
+  COLDEFS.forEach(function(c){colFilters[c.key]=[];});
   renderAll();
 }
 
@@ -428,18 +446,97 @@ function setSt(s){
   renderStatusFilter();renderOp();
 }
 
-function renderOp(){
+function opBaseFilter(excludeKey){
   var q=(document.getElementById('searchOp')||{value:''}).value.toLowerCase();
-  var rows=data.filter(function(d){
-    return(fEmp.indexOf(d.empresa)>=0)&&(fSt.indexOf(d.situacaoFch)>=0)&&(!q||d.demanda.toLowerCase().indexOf(q)>=0||d.responsavel.toLowerCase().indexOf(q)>=0);
+  return data.filter(function(d){
+    if(fEmp.indexOf(d.empresa)<0)return false;
+    if(fSt.indexOf(d.situacaoFch)<0)return false;
+    if(q&&d.demanda.toLowerCase().indexOf(q)<0&&d.responsavel.toLowerCase().indexOf(q)<0)return false;
+    for(var i=0;i<COLDEFS.length;i++){
+      var k=COLDEFS[i].key;
+      if(k===excludeKey)continue;
+      var arr=colFilters[k];
+      if(arr&&arr.length&&arr.indexOf(colValue(d,k))<0)return false;
+    }
+    return true;
   });
+}
+
+function renderOp(){
+  var rows=opBaseFilter(null);
   var trs=rows.map(function(r){
     var entCell=r.dataEntregaFch||'-';
     var obsCell='<span class="obs-cell">'+(r.observacoes?escHtml(r.observacoes):'')+'</span>';
-    return '<tr><td><span class="emp-tag">'+r.empresa+'</span></td><td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.demanda+'</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8b92b8">'+r.descricao+'</td><td>'+r.responsavel+'</td><td>'+r.dataPrazoFch+'</td><td>'+entCell+'</td><td>'+badge(r.situacaoFch)+'</td><td>'+obsCell+'</td></tr>';
+    return '<tr><td><span class="emp-tag">'+r.empresa+'</span></td><td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r.demanda+'</td><td style="max-width:220px;white-space:normal;word-break:break-word;overflow-wrap:break-word;color:#8b92b8">'+r.descricao+'</td><td>'+r.responsavel+'</td><td>'+r.dataPrazoFch+'</td><td>'+entCell+'</td><td>'+badge(r.situacaoFch)+'</td><td>'+obsCell+'</td></tr>';
   }).join('');
-  document.getElementById('opTable').innerHTML='<thead><tr><th>Emp.</th><th>Demanda</th><th>Descricao</th><th>Responsavel</th><th>Prazo FCH</th><th>Data entrega</th><th>Status</th><th>Observações</th></tr></thead><tbody>'+trs+'</tbody>';
+  var theadHtml='<thead><tr>'+COLDEFS.map(function(c){
+    var active=colFilters[c.key]&&colFilters[c.key].length?' active':'';
+    return '<th><span class="th-wrap">'+c.label+'<span class="colf-btn'+active+'" onclick="toggleColFilter(\''+c.key+'\',event)">\u25BC</span></span></th>';
+  }).join('')+'</tr></thead>';
+  document.getElementById('opTable').innerHTML=theadHtml+'<tbody>'+trs+'</tbody>';
   document.getElementById('opCount').textContent=rows.length+' demanda'+(rows.length!==1?'s':'')+' exibida'+(rows.length!==1?'s':'');
+}
+
+function closeColfOnce(e){
+  var p=document.getElementById('colfPanel');
+  if(p&&!p.contains(e.target)){p.remove();document.removeEventListener('click',closeColfOnce);}
+}
+function filterColfList(input){
+  var q=input.value.toLowerCase();
+  var items=input.parentElement.querySelectorAll('.colf-item');
+  items.forEach(function(it){it.style.display=it.getAttribute('data-val').indexOf(q)>=0?'flex':'none';});
+}
+function toggleColFilter(key,ev){
+  ev.stopPropagation();
+  var existing=document.getElementById('colfPanel');
+  if(existing){
+    var wasKey=existing.getAttribute('data-key');
+    existing.remove();
+    document.removeEventListener('click',closeColfOnce);
+    if(wasKey===key)return;
+  }
+  var btn=ev.currentTarget;
+  var rect=btn.getBoundingClientRect();
+  var rowsForOptions=opBaseFilter(key);
+  var uniq=[];
+  rowsForOptions.forEach(function(d){var v=colValue(d,key);if(uniq.indexOf(v)<0)uniq.push(v);});
+  uniq.sort(function(a,b){return String(a).localeCompare(String(b),'pt-BR');});
+  var selected=(colFilters[key]&&colFilters[key].length)?colFilters[key]:uniq.slice();
+  var panel=document.createElement('div');
+  panel.className='colf-panel';
+  panel.id='colfPanel';
+  panel.setAttribute('data-key',key);
+  panel.style.top=(rect.bottom+4)+'px';
+  panel.style.left=Math.max(4,Math.min(rect.left,(window.innerWidth||1200)-236))+'px';
+  panel.innerHTML=
+    '<input class="colf-search" placeholder="Buscar..." oninput="filterColfList(this)">'+
+    '<div class="colf-list">'+uniq.map(function(v){
+      var vs=String(v);
+      var checked=selected.indexOf(v)>=0?'checked':'';
+      return '<label class="colf-item" data-val="'+escHtml(vs).toLowerCase()+'"><input type="checkbox" value="'+escHtml(vs)+'" '+checked+'> '+escHtml(vs)+'</label>';
+    }).join('')+'</div>'+
+    '<div class="colf-actions">'+
+      '<button class="primary" onclick="applyColFilter(\''+key+'\')">OK</button>'+
+      '<button onclick="clearColFilter(\''+key+'\')">Limpar</button>'+
+    '</div>';
+  document.body.appendChild(panel);
+  setTimeout(function(){document.addEventListener('click',closeColfOnce);},0);
+}
+function applyColFilter(key){
+  var panel=document.getElementById('colfPanel');
+  if(!panel)return;
+  var checked=Array.prototype.slice.call(panel.querySelectorAll('input[type=checkbox]:checked')).map(function(c){return c.value;});
+  var all=Array.prototype.slice.call(panel.querySelectorAll('input[type=checkbox]')).map(function(c){return c.value;});
+  colFilters[key]=(checked.length===all.length)?[]:checked;
+  panel.remove();
+  document.removeEventListener('click',closeColfOnce);
+  renderOp();
+}
+function clearColFilter(key){
+  colFilters[key]=[];
+  var panel=document.getElementById('colfPanel');
+  if(panel){panel.remove();document.removeEventListener('click',closeColfOnce);}
+  renderOp();
 }
 
 function switchTab(tab,el){
