@@ -311,7 +311,7 @@ function perfCard(){
       datasets:[{data:[noPrazo,atrasado,andamento],backgroundColor:['#276221','#9C0006','#3d7dd4'],borderColor:'#1a1d2e',borderWidth:2}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{
-        legend:{position:'bottom',labels:{color:'#8b92b8',font:{size:12.6},boxWidth:10,padding:6}},
+        legend:{position:'right',align:'center',labels:{color:'#8b92b8',font:{size:12.6},boxWidth:10,padding:8}},
         tooltip:{callbacks:{label:function(c){
           var v=c.parsed,pc=tot?Math.round(v/tot*100):0;
           return c.label+': '+v+' ('+pc+'%)';
