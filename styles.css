@@ -48,19 +48,19 @@ body{font-family:Calibri,Arial,sans-serif;background:var(--bg);color:var(--text)
 .section-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
 .section-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .perf-flex{display:flex;align-items:center;gap:14px}
-.perf-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:11px;border-bottom:1px solid var(--border)}
+.perf-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:22px;border-bottom:1px solid var(--border)}
 .perf-row:last-child{border-bottom:none}
 .perf-label{color:var(--muted)}
 .perf-val{font-weight:700}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:13px}
-.card-title{font-size:12px;font-weight:500;color:#fff;margin-bottom:11px;display:flex;align-items:center;gap:5px}
+.card-title{font-size:24px;font-weight:500;color:#fff;margin-bottom:11px;display:flex;align-items:center;gap:5px}
 .empresa-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
 .empresa-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.empresa-name{font-size:11px;color:var(--muted);width:50px}
+.empresa-name{font-size:22px;color:var(--muted);width:100px}
 .bar-bg{flex:1;background:var(--bg3);border-radius:3px;height:6px;overflow:hidden}
 .bar-fill{height:100%;border-radius:3px}
-.empresa-pct{font-size:11px;font-weight:600;width:30px;text-align:right}
-.empresa-cnt{font-size:10px;color:var(--muted);min-width:70px;text-align:right}
+.empresa-pct{font-size:22px;font-weight:600;width:55px;text-align:right}
+.empresa-cnt{font-size:20px;color:var(--muted);min-width:130px;text-align:right}
 .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
 .tbl{width:100%;border-collapse:collapse;font-size:11px}
 .tbl th{text-align:left;padding:6px 8px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border);text-transform:uppercase;font-size:10px;letter-spacing:.4px}
@@ -79,3 +79,6 @@ body{font-family:Calibri,Arial,sans-serif;background:var(--bg);color:var(--text)
 .obs-cell{display:block;max-width:220px;white-space:normal;word-break:break-word;overflow-wrap:break-word;color:var(--muted);font-size:11px;line-height:1.4}
 .inp-obs{font-size:11px;padding:3px 6px;border-radius:4px;border:1px solid var(--border);background:var(--bg3);color:#fff;width:160px}
 .emp-tag{background:var(--bg3);border:1px solid var(--border);padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;color:var(--muted)}
+#collabTable{font-size:22px}
+#collabTable th{font-size:20px;padding:8px 10px}
+#collabTable td{padding:10px 10px}

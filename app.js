@@ -278,8 +278,8 @@ function statusChart(){
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false}},
       scales:{
-        x:{ticks:{color:'#8b92b8',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},
-        y:{ticks:{color:'#8b92b8',font:{size:10}},grid:{color:'rgba(255,255,255,.06)'},beginAtZero:true}
+        x:{ticks:{color:'#8b92b8',font:{size:20}},grid:{color:'rgba(255,255,255,.04)'}},
+        y:{ticks:{color:'#8b92b8',font:{size:20}},grid:{color:'rgba(255,255,255,.06)'},beginAtZero:true}
       }}
   });
 }
@@ -313,7 +313,7 @@ function perfCard(){
       datasets:[{data:[noPrazo,atrasado,andamento],backgroundColor:['#276221','#9C0006','#3d7dd4'],borderColor:'#1a1d2e',borderWidth:2}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{
-        legend:{position:'bottom',labels:{color:'#8b92b8',font:{size:9},boxWidth:8,padding:8}},
+        legend:{position:'bottom',labels:{color:'#8b92b8',font:{size:18},boxWidth:14,padding:8}},
         tooltip:{callbacks:{label:function(c){
           var v=c.parsed,pc=tot?Math.round(v/tot*100):0;
           return c.label+': '+v+' ('+pc+'%)';
@@ -391,8 +391,8 @@ function impactoCard(){
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false}},
       scales:{
-        x:{ticks:{color:'#8b92b8',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'}},
-        y:{ticks:{color:'#8b92b8',font:{size:9}},grid:{color:'rgba(255,255,255,.06)'},beginAtZero:true}
+        x:{ticks:{color:'#8b92b8',font:{size:18}},grid:{color:'rgba(255,255,255,.04)'}},
+        y:{ticks:{color:'#8b92b8',font:{size:18}},grid:{color:'rgba(255,255,255,.06)'},beginAtZero:true}
       }}
   });
 }
